@@ -36,10 +36,11 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QStackedWidget>
+#include <QIntValidator>
 
 #define NO_PROVIDER ""
-#define VAGRANT_PROVIDER "VagrantProviderWidget"
-#define AMAZON_PROVIDER "AmazonProviderWidget"
+#define VAGRANT_PROVIDER "Vagrant"
+#define AMAZON_PROVIDER "Amazon EC2"
 #define EDIT_WIDTH 150
 #define ADDRESS_WIDTH 110
 #define PORT_WIDTH 30
@@ -99,7 +100,7 @@ void CloudDialog::createWidgets()
 
   label = new QLabel;
   label->setObjectName("H2");
-  label->setText("Cloud Resources");
+  label->setText("Cloud Resource");
   m_leftLoginLayout->addWidget(label,0,Qt::AlignTop | Qt::AlignLeft);
 
   m_cloudResourceComboBox = new QComboBox();
@@ -132,8 +133,10 @@ void CloudDialog::createWidgets()
   AWSProvider awsProvider;
 
   m_legalAgreement = new QLabel;
+  m_legalAgreement->setFixedWidth(TEXT_WIDTH);
+  m_legalAgreement->setWordWrap(true);
   m_legalAgreement->hide();
-  m_legalAgreement->setText("TBD NREL Legal statement");
+  m_legalAgreement->setText("DISCLAIMER\n\nTHIS SOFTWARE IS PROVIDED BY THE CONTRACTOR \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE CONTRACTOR OR THE U.S. GOVERNMENT BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER, INCLUDING BUT NOT LIMITED TO CLAIMS ASSOCIATED WITH THE LOSS OF DATA OR PROFITS, WHICH MAY RESULT FROM AN ACTION IN CONTRACT, NEGLIGENCE OR OTHER TORTIOUS CLAIM THAT ARISES OUT OF OR IN CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE.");
   // TODO
   //boost::optional<CloudProviderWidget *> cloudProviderWidget = this->getCurrentCloudProviderWidget();
   //if(cloudProviderWidget.is_initialized()){
@@ -570,7 +573,7 @@ void VagrantProviderWidget::createSettingsWidget()
   hLayout->setSpacing(5);
   m_leftSettingsLayout->addLayout(hLayout);
 
-  m_serverDirLineEdit = new QLineEdit();
+  m_serverDirLineEdit = new QLineEdit("c:/vagrant/folder");
   m_serverDirLineEdit->setFixedWidth(EDIT_WIDTH);
   hLayout->addWidget(m_serverDirLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
   
@@ -593,11 +596,11 @@ void VagrantProviderWidget::createSettingsWidget()
   hLayout->setSpacing(5);
   m_leftSettingsLayout->addLayout(hLayout);
 
-  m_serverAddressIpLineEdit = new QLineEdit();
+  m_serverAddressIpLineEdit = new QLineEdit("localhost");
   m_serverAddressIpLineEdit->setFixedWidth(ADDRESS_WIDTH);
   hLayout->addWidget(m_serverAddressIpLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
 
-  m_serverPortIpLineEdit = new QLineEdit();
+  m_serverPortIpLineEdit = new QLineEdit("8080");
   m_serverPortIpLineEdit->setFixedWidth(PORT_WIDTH);
   hLayout->addWidget(m_serverPortIpLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
 
@@ -613,7 +616,7 @@ void VagrantProviderWidget::createSettingsWidget()
   hLayout->setSpacing(5);
   m_leftSettingsLayout->addLayout(hLayout);
 
-  m_workerDirLineEdit = new QLineEdit();
+  m_workerDirLineEdit = new QLineEdit("c:/vagrant/folder");
   m_workerDirLineEdit->setFixedWidth(EDIT_WIDTH);
   hLayout->addWidget(m_workerDirLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
 
@@ -636,11 +639,11 @@ void VagrantProviderWidget::createSettingsWidget()
   hLayout->setSpacing(5);
   m_leftSettingsLayout->addLayout(hLayout);
 
-  m_workerAddressIpLineEdit = new QLineEdit();
+  m_workerAddressIpLineEdit = new QLineEdit("localhost");
   m_workerAddressIpLineEdit->setFixedWidth(ADDRESS_WIDTH);
   hLayout->addWidget(m_workerAddressIpLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
 
-  m_workerPortIpLineEdit = new QLineEdit();
+  m_workerPortIpLineEdit = new QLineEdit("8081");
   m_workerPortIpLineEdit->setFixedWidth(PORT_WIDTH);
   hLayout->addWidget(m_workerPortIpLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
 
@@ -658,6 +661,8 @@ void VagrantProviderWidget::createSettingsWidget()
 
 void  VagrantProviderWidget::loadData()
 {
+  return; // TODO remove
+
   openstudio::path serverPath;
   openstudio::Url serverUrl;
   openstudio::path workerPath;
@@ -670,7 +675,7 @@ void  VagrantProviderWidget::loadData()
   bool isChecked = true;
   m_runOnStartUpCheckBox->setChecked(isChecked);
 
-  QString text("N/A");
+  QString text;
 
   m_serverUsernameLineEdit->setText(text);
   m_serverPasswordLineEdit->setText(text);
@@ -738,9 +743,7 @@ AmazonProviderWidget::AmazonProviderWidget(QWidget * parent)
   m_workerInstanceTypeComboBox(0),
   m_accessKeyLineEdit(0),
   m_secretKeyLineEdit(0),
-  m_selectPrivateKeyLineEdit(0),
-  m_numberOfWorkerInstancesLineEdit(0),
-  m_elasticStorageCapacityLineEdit(0)
+  m_numberOfWorkerInstancesLineEdit(0)
 {
   createLoginWidget();
   createSettingsWidget();
@@ -779,15 +782,6 @@ void AmazonProviderWidget::createLoginWidget()
   m_secretKeyLineEdit = new QLineEdit();
   m_secretKeyLineEdit->setFixedWidth(EDIT_WIDTH);
   m_leftLoginLayout->addWidget(m_secretKeyLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
-  
-  label = new QLabel;
-  label->setObjectName("H2");
-  label->setText("Select Private Key File");
-  m_leftLoginLayout->addWidget(label,0,Qt::AlignTop | Qt::AlignLeft);
-    
-  m_selectPrivateKeyLineEdit = new QLineEdit();
-  m_secretKeyLineEdit->setFixedWidth(EDIT_WIDTH);
-  m_leftLoginLayout->addWidget(m_selectPrivateKeyLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
 
   m_leftLoginLayout->addStretch();
 
@@ -844,15 +838,10 @@ void AmazonProviderWidget::createSettingsWidget()
   m_numberOfWorkerInstancesLineEdit = new QLineEdit();
   m_numberOfWorkerInstancesLineEdit->setFixedWidth(EDIT_WIDTH);
   m_leftSettingsLayout->addWidget(m_numberOfWorkerInstancesLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
-  
-  label = new QLabel;
-  label->setObjectName("H2");
-  label->setText("Elastic Storage Capacity (GB)");
-  m_leftSettingsLayout->addWidget(label,0,Qt::AlignTop | Qt::AlignLeft);
-  
-  m_elasticStorageCapacityLineEdit = new QLineEdit();
-  m_elasticStorageCapacityLineEdit->setFixedWidth(EDIT_WIDTH);
-  m_leftSettingsLayout->addWidget(m_elasticStorageCapacityLineEdit,0,Qt::AlignTop | Qt::AlignLeft);
+  QIntValidator * validator = new QIntValidator(m_numberOfWorkerInstancesLineEdit);
+  m_numberOfWorkerInstancesLineEdit->setValidator(validator);
+  validator->setBottom(1);
+  validator->setTop(20);
 
   m_leftSettingsLayout->addStretch();
 
@@ -873,8 +862,10 @@ void AmazonProviderWidget::createSettingsWidget()
 
 void  AmazonProviderWidget::loadData()
 {
+  return; // TODO remove
+
   AWSProvider awsProvider;
-  
+
   //m_regionComboBox;
   //m_serverInstanceTypeComboBox;
   //m_workerInstanceTypeComboBox;
