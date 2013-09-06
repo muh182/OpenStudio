@@ -76,6 +76,7 @@ MODELOBJECT_TEMPLATES(CoilHeatingLowTempRadiantConstFlow);
 MODELOBJECT_TEMPLATES(CoilHeatingLowTempRadiantVarFlow);
 MODELOBJECT_TEMPLATES(CoolingTowerSingleSpeed);
 MODELOBJECT_TEMPLATES(EvaporativeCoolerDirectResearchSpecial);
+MODELOBJECT_TEMPLATES(EvaporativeFluidCoolerSingleSpeed);
 MODELOBJECT_TEMPLATES(FanConstantVolume);
 MODELOBJECT_TEMPLATES(FanOnOff);
 MODELOBJECT_TEMPLATES(FanVariableVolume);
@@ -105,6 +106,7 @@ MODELOBJECT_TEMPLATES(WaterUseEquipmentDefinition);
 MODELOBJECT_TEMPLATES(WaterUseEquipment);
 MODELOBJECT_TEMPLATES(WaterUseConnections);
 MODELOBJECT_TEMPLATES(HeatExchangerAirToAirSensibleAndLatent);
+MODELOBJECT_TEMPLATES(GroundHeatExchangerVertical);
 
 SWIG_MODELOBJECT(PortList);
 SWIG_MODELOBJECT(Loop);
@@ -159,6 +161,7 @@ SWIG_MODELOBJECT(CoilHeatingLowTempRadiantConstFlow);
 SWIG_MODELOBJECT(CoilHeatingLowTempRadiantVarFlow);
 SWIG_MODELOBJECT(CoolingTowerSingleSpeed);
 SWIG_MODELOBJECT(EvaporativeCoolerDirectResearchSpecial);
+SWIG_MODELOBJECT(EvaporativeFluidCoolerSingleSpeed);
 SWIG_MODELOBJECT(FanConstantVolume);
 SWIG_MODELOBJECT(FanOnOff);
 SWIG_MODELOBJECT(FanVariableVolume);
@@ -188,6 +191,7 @@ SWIG_MODELOBJECT(WaterUseEquipmentDefinition);
 SWIG_MODELOBJECT(WaterUseEquipment);
 SWIG_MODELOBJECT(WaterUseConnections);
 SWIG_MODELOBJECT(HeatExchangerAirToAirSensibleAndLatent);
+SWIG_MODELOBJECT(GroundHeatExchangerVertical);
 
 #if defined SWIGCSHARP
 

@@ -1,6 +1,7 @@
 SET( target_name openstudio_model )
 
 SET( ${target_name}_src 
+ 
   mainpage.hpp 
   ModelAPI.hpp
   Model.hpp
@@ -280,6 +281,9 @@ SET( ${target_name}_src
   EvaporativeCoolerDirectResearchSpecial.hpp
   EvaporativeCoolerDirectResearchSpecial_Impl.hpp
   EvaporativeCoolerDirectResearchSpecial.cpp
+  EvaporativeFluidCoolerSingleSpeed.hpp
+  EvaporativeFluidCoolerSingleSpeed_Impl.hpp
+  EvaporativeFluidCoolerSingleSpeed.cpp
   ExteriorLights.hpp
   ExteriorLights_Impl.hpp
   ExteriorLights.cpp
@@ -325,6 +329,9 @@ SET( ${target_name}_src
   Glazing.hpp
   Glazing_Impl.hpp
   Glazing.cpp
+  GroundHeatExchangerVertical.hpp
+  GroundHeatExchangerVertical_Impl.hpp
+  GroundHeatExchangerVertical.cpp
   HeatBalanceAlgorithm.hpp
   HeatBalanceAlgorithm_Impl.hpp
   HeatBalanceAlgorithm.cpp
@@ -877,6 +884,7 @@ SET( ${target_name}_moc
   ElectricEquipment_Impl.hpp
   ElectricEquipmentDefinition_Impl.hpp
   EvaporativeCoolerDirectResearchSpecial_Impl.hpp
+  EvaporativeFluidCoolerSingleSpeed_Impl.hpp
   ExteriorLights_Impl.hpp
   ExteriorLightsDefinition_Impl.hpp
   Facility_Impl.hpp
@@ -892,6 +900,7 @@ SET( ${target_name}_moc
   GasMixture_Impl.hpp
   GlareSensor_Impl.hpp
   Glazing_Impl.hpp
+  GroundHeatExchangerVertical_Impl.hpp
   HeatBalanceAlgorithm_Impl.hpp
   HeatExchangerAirToAirSensibleAndLatent_Impl.hpp
   HotWaterEquipment_Impl.hpp
@@ -1116,6 +1125,7 @@ SET( ${target_name}_test_src
   test/DistrictCooling_GTest.cpp
   test/DistrictHeating_GTest.cpp
   test/ElectricEquipment_GTest.cpp
+  test/EvaporativeFluidCoolerSingleSpeed_GTest.cpp
   test/Facility_GTest.cpp
   test/FanVariableVolume_GTest.cpp
   test/FanOnOff_GTest.cpp
@@ -1124,6 +1134,7 @@ SET( ${target_name}_test_src
   test/GasMixture_GTest.cpp
   test/Gas_GTest.cpp
   test/GlareSensor_GTest.cpp
+  test/GroundHeatExchangerVertical_GTest.cpp
   test/HotWaterEquipment_GTest.cpp
   test/HeatExchangerAirToAirSensibleAndLatent_GTest.cpp
   test/IlluminanceMap_GTest.cpp

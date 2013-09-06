@@ -19,6 +19,7 @@
 #include <utilities/cloud/AWSProvider.hpp>
 #include <utilities/cloud/AWSProvider_Impl.hpp>
 
+#include <utilities/core/Application.hpp>
 #include <utilities/core/ApplicationPathHelpers.hpp>
 #include <utilities/core/Assert.hpp>
 #include <utilities/core/Path.hpp>
@@ -30,6 +31,7 @@
 #include <QDir>
 #include <QFile>
 #include <QProcess>
+#include <QSettings>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
@@ -39,10 +41,16 @@ namespace openstudio{
 
     AWSProvider_Impl::AWSProvider_Impl()
       : CloudProvider_Impl(),
+        m_cloudSession(this->type(), toString(createUUID()), OptionalUrl(), UrlVector()),
         m_validAccessKey(false),
         m_validSecretKey(false),
-        m_ami("ami-d0f89fb9")
+        m_numWorkers(0),
+        m_startServerProcess(NULL), m_startWorkerProcess(NULL),
+        m_serverStarted(false), m_workerStarted(false), m_terminated(false), m_serverStopped(false), m_workerStopped(false)
     {
+      //Make sure a QApplication exists
+      openstudio::Application::instance().application();
+
       if (loadCredentials()) {
         validateCredentials();
       }
@@ -55,16 +63,27 @@ namespace openstudio{
 
     std::string AWSProvider_Impl::userAgreementText() const
     {
-      return std::string();
+      return "NREL is not responsible for any charges you may incur as a result of using the OpenStudio suite with Amazon Web Services.";
     }
 
     bool AWSProvider_Impl::userAgreementSigned() const
     {
-      return false;
+      QSettings settings("OpenStudio", "AWSProvider");
+      QString value = settings.value("userAgreementSigned", "No").toString();
+
+      bool result = false;
+      if (value == "Yes"){
+        result = true;
+      }
+
+      return result;
     }
 
     void AWSProvider_Impl::signUserAgreement(bool agree)
     {
+      QString value = agree ? "Yes" : "No";
+      QSettings settings("OpenStudio", "AWSProvider");
+      settings.setValue("userAgreementSigned", value);
     }
 
     bool AWSProvider_Impl::internetAvailable() const
@@ -105,14 +124,14 @@ namespace openstudio{
       return false;
     }
 
+    CloudSession AWSProvider_Impl::session() const
+    {
+      return m_cloudSession;
+    }
+
     bool AWSProvider_Impl::reconnect(const CloudSession& session)
     {
       return false;
-    }
-
-    CloudSession AWSProvider_Impl::session() const
-    {
-      return CloudSession(std::string(), std::string(), OptionalUrl(), UrlVector());
     }
 
     boost::optional<Url> AWSProvider_Impl::serverUrl() const
@@ -123,10 +142,7 @@ namespace openstudio{
     bool AWSProvider_Impl::startServer()
     {
       QVariantMap map = awsRequest("launch_instance");
-      if (!map.keys().contains("error")) {
-        return true;
-      }
-      return false;
+      return !map.keys().contains("error");
     }
 
     std::vector<Url> AWSProvider_Impl::workerUrls() const
@@ -136,12 +152,13 @@ namespace openstudio{
 
     unsigned AWSProvider_Impl::numWorkers() const
     {
-      return 0;
+      return m_numWorkers;
     }
 
     bool AWSProvider_Impl::startWorkers()
     {
-      return false;
+      QVariantMap map = awsRequest("launch_slaves");
+      return !map.keys().contains("error");
     }
 
     bool AWSProvider_Impl::running() const
@@ -167,6 +184,24 @@ namespace openstudio{
     std::vector<std::string> AWSProvider_Impl::warnings() const
     {
       return std::vector<std::string>();
+    }
+     
+    void AWSProvider_Impl::clearErrorsAndWarnings() const
+    {
+      m_errors.clear();
+      m_warnings.clear();
+    }
+
+    void AWSProvider_Impl::logError(const std::string& error) const
+    {
+      m_errors.push_back(error);
+      LOG(Error, error);
+    }
+
+    void AWSProvider_Impl::logWarning(const std::string& warning) const
+    {
+      m_warnings.push_back(warning);
+      LOG(Warn, warning);
     }
 
 
@@ -214,6 +249,24 @@ namespace openstudio{
       return QRegExp("[a-zA-Z0-9/+]{40}").exactMatch(toQString(secretKey));
     }
 
+    std::string AWSProvider_Impl::accessKey() const {
+      return m_accessKey;
+    }
+    
+    std::string AWSProvider_Impl::secretKey() const {
+      return m_secretKey;
+    }
+    
+    bool AWSProvider_Impl::setKeys(std::string accessKey, std::string secretKey) const {
+      if (validAccessKey(accessKey) && validSecretKey(secretKey)) {
+        m_accessKey = accessKey;
+        m_secretKey = secretKey;
+
+        return true;
+      }
+      return false;
+    }
+
     QVariantMap AWSProvider_Impl::awsRequest(std::string request, std::string service) const {
       QString script = toQString(getOpenStudioRubyScriptsPath() / toPath("cloud/aws.rb"));
       QProcess *ruby2 = new QProcess();
@@ -238,29 +291,39 @@ namespace openstudio{
       return QVariantMap();
     }
 
-    std::string AWSProvider_Impl::accessKey() const {
-      return m_accessKey;
+    void AWSProvider_Impl::setNumWorkers(const unsigned numWorkers)
+    {
+      m_numWorkers = numWorkers;
     }
-    
-    std::string AWSProvider_Impl::secretKey() const {
-      return m_secretKey;
-    }
-    
-    bool AWSProvider_Impl::setKeys(std::string accessKey, std::string secretKey) const {
-      if (validAccessKey(accessKey) && validSecretKey(secretKey)) {
-        m_accessKey = accessKey;
-        m_secretKey = secretKey;
 
-        return true;
-      }
-      return false;
+
+    void AWSProvider_Impl::onServerStarted(int, QProcess::ExitStatus)
+    {
     }
+
+    void AWSProvider_Impl::onWorkerStarted(int, QProcess::ExitStatus)
+    {
+    }
+
+    void AWSProvider_Impl::onServerStopped(int, QProcess::ExitStatus)
+    {
+    }
+
+    void AWSProvider_Impl::onWorkerStopped(int, QProcess::ExitStatus)
+    {
+    }
+
+
 
   } // detail
 
   AWSProvider::AWSProvider()
     : CloudProvider(boost::shared_ptr<detail::AWSProvider_Impl>(new detail::AWSProvider_Impl()))
   {
+  }
+
+  unsigned AWSProvider::numWorkers() {
+    return getImpl<detail::AWSProvider_Impl>()->numWorkers();
   }
 
 } // openstudio

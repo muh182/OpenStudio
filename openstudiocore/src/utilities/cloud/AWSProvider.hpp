@@ -45,11 +45,14 @@ namespace openstudio{
     /** @name Class members */
     //@{
 
+    // returns the current number of worker nodes
+    unsigned numWorkers();
+
     //@}
   private:
 
-    // configure logging
-    REGISTER_LOGGER("utilities.cloud.AWSProvider");
+    // no body on purpose, do not want this generated
+    AWSProvider(const AWSProvider& other);
 
   };
 
