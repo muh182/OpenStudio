@@ -367,7 +367,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processAvailable()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processAvailable()));
       OS_ASSERT(test);
 
       return true;
@@ -387,7 +387,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processProjectUUIDs()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processProjectUUIDs()));
       OS_ASSERT(test);
 
       return true;
@@ -428,7 +428,7 @@ namespace openstudio{
 
         m_networkReply = m_networkAccessManager->post(request, postData);
 
-        bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processCreateProject()));
+        bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processCreateProject()));
         OS_ASSERT(test);
 
         return true;
@@ -452,7 +452,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->deleteResource(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processDeleteProject()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processDeleteProject()));
       OS_ASSERT(test);
 
       return true;
@@ -474,7 +474,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processAnalysisUUIDs()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processAnalysisUUIDs()));
       OS_ASSERT(test);
 
       return true;
@@ -501,7 +501,7 @@ namespace openstudio{
 
       m_networkReply = m_networkAccessManager->post(request, postData);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processPostAnalysisJSON()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processPostAnalysisJSON()));
       OS_ASSERT(test);
 
       return true;
@@ -528,7 +528,7 @@ namespace openstudio{
 
       m_networkReply = m_networkAccessManager->post(request, postData);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processPostDataPointJSON()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processPostDataPointJSON()));
       OS_ASSERT(test);
 
       return true;
@@ -552,14 +552,11 @@ namespace openstudio{
           QString bound="-------3dpj1k39xoa84u4804ee1156snfxl6"; 
 
           QByteArray data(QString("--" + bound + "\r\n").toAscii());
-          //data += "Content-Disposition: form-data; name=\"action\"\r\n\r\n";
-          //data += "\r\n";
-          //data += QString("--" + bound + "\r\n").toAscii();
           data += "Content-Disposition: form-data; name=\"file\"; filename=\"seed_zip.zip\"\r\n";
-          data += "Content-Type: application/zip\r\n\r\n";
+          data += "Content-Type: application/x-zip-compressed\r\n\r\n";
           data.append(file.readAll());
           data += "\r\n";
-          data += QString("--" + bound + "\r\n.").toAscii();
+          data += QString("--" + bound + "--\r\n.").toAscii();
           data += "\r\n";
           file.close();
 
@@ -567,8 +564,7 @@ namespace openstudio{
           QUrl url(m_url.toString().append("/analyses/").append(id).append("/upload.json")); 
 
           QNetworkRequest request(url);
-          request.setRawHeader(QString("Accept").toAscii(), QString("*/*; q=0.5, application/xml").toAscii());
-          request.setRawHeader(QString("Accept-Encoding").toAscii(), QString("gzip,deflate").toAscii());
+          request.setRawHeader(QString("Cache-Control").toAscii(),QString("no-cache").toAscii());
           request.setRawHeader(QString("Content-Type").toAscii(),QString("multipart/form-data; boundary=" + bound).toAscii());
           request.setRawHeader(QString("Content-Length").toAscii(), QString::number(data.length()).toAscii());
          
@@ -616,7 +612,7 @@ namespace openstudio{
 
         m_networkReply = m_networkAccessManager->post(request, postData);
 
-        bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processStart()));
+        bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processStart()));
         OS_ASSERT(test);
 
         return true;
@@ -640,7 +636,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processIsAnalysisQueued()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processIsAnalysisQueued()));
       OS_ASSERT(test);
 
       return true;
@@ -661,7 +657,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processIsAnalysisRunning()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processIsAnalysisRunning()));
       OS_ASSERT(test);
 
       return true;
@@ -696,7 +692,7 @@ namespace openstudio{
 
         m_networkReply = m_networkAccessManager->post(request, postData);
 
-        bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processStop()));
+        bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processStop()));
         OS_ASSERT(test);
 
         return true;
@@ -722,7 +718,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processDataPointUUIDs()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processDataPointUUIDs()));
       OS_ASSERT(test);
 
       return true;
@@ -743,7 +739,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processRunningDataPointUUIDs()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processRunningDataPointUUIDs()));
       OS_ASSERT(test);
 
       return true;
@@ -764,7 +760,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processQueuedDataPointUUIDs()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processQueuedDataPointUUIDs()));
       OS_ASSERT(test);
 
       return true;
@@ -785,7 +781,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processCompleteDataPointUUIDs()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processCompleteDataPointUUIDs()));
       OS_ASSERT(test);
 
       return true;
@@ -807,7 +803,7 @@ namespace openstudio{
       QNetworkRequest request(url);
       m_networkReply = m_networkAccessManager->get(request);
 
-      bool test = connect(m_networkReply, SIGNAL(finished()), this, SLOT(processDataPointJSON()));
+      bool test = QObject::connect(m_networkReply, SIGNAL(finished()), this, SLOT(processDataPointJSON()));
       OS_ASSERT(test);
 
       return true;
@@ -821,6 +817,8 @@ namespace openstudio{
     void OSServer_Impl::processAvailable()
     {
       bool success = false;
+
+      logNetworkReply("processAvailable");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastAvailable = true;
@@ -841,6 +839,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processProjectUUIDs");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastProjectUUIDs = processListOfUUID(m_networkReply->readAll(), success);
       }else{
@@ -858,6 +858,8 @@ namespace openstudio{
     void OSServer_Impl::processCreateProject()
     {
       bool success = false;
+
+      logNetworkReply("processCreateProject");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastCreateProjectSuccess = true;
@@ -878,6 +880,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processDeleteProject");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastDeleteProjectSuccess = true;
         success = true;
@@ -896,6 +900,8 @@ namespace openstudio{
     void OSServer_Impl::processAnalysisUUIDs()
     {
       bool success = false;
+
+      logNetworkReply("processAnalysisUUIDs");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         //m_lastAnalysisUUIDs = processListOfUUID(m_networkReply->readAll(), success);
@@ -942,6 +948,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processPostAnalysisJSON");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastPostAnalysisJSONSuccess = true;
         success = true;
@@ -960,6 +968,8 @@ namespace openstudio{
     void OSServer_Impl::processPostDataPointJSON()
     {
       bool success = false;
+
+      logNetworkReply("processPostDataPointJSON");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastPostDataPointJSONSuccess = true;
@@ -980,6 +990,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processUploadAnalysisFiles");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastUploadAnalysisFilesSuccess = true;
         success = true;
@@ -999,6 +1011,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processPostDataPointJSON");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastStartSuccess = true;
         success = true;
@@ -1017,6 +1031,8 @@ namespace openstudio{
     void OSServer_Impl::processIsAnalysisQueued()
     {
       bool success = false;
+
+      logNetworkReply("processIsAnalysisQueued");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
 
@@ -1062,6 +1078,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processIsAnalysisRunning");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
 
         bool test;
@@ -1106,6 +1124,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processStop");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastStopSuccess = true;
         success = true;
@@ -1124,6 +1144,8 @@ namespace openstudio{
     void OSServer_Impl::processDataPointUUIDs()
     {
       bool success = false;
+
+      logNetworkReply("processDataPointUUIDs");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         //m_lastDataPointUUIDs = processListOfUUID(m_networkReply->readAll(), success);
@@ -1169,6 +1191,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processRunningDataPointUUIDs");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastRunningDataPointUUIDs = processListOfUUID(m_networkReply->readAll(), success);
       }else{
@@ -1186,6 +1210,8 @@ namespace openstudio{
     void OSServer_Impl::processQueuedDataPointUUIDs()
     {
       bool success = false;
+
+      logNetworkReply("processQueuedDataPointUUIDs");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastQueuedDataPointUUIDs = processListOfUUID(m_networkReply->readAll(), success);
@@ -1205,6 +1231,8 @@ namespace openstudio{
     {
       bool success = false;
 
+      logNetworkReply("processCompleteDataPointUUIDs");
+
       if (m_networkReply->error() == QNetworkReply::NoError){
         m_lastCompleteDataPointUUIDs = processListOfUUID(m_networkReply->readAll(), success);
       }else{
@@ -1222,6 +1250,8 @@ namespace openstudio{
     void OSServer_Impl::processDataPointJSON()
     {
       bool success = false;
+
+      logNetworkReply("processDataPointJSON");
 
       if (m_networkReply->error() == QNetworkReply::NoError){
         bool test;
@@ -1251,6 +1281,38 @@ namespace openstudio{
     {
       m_errors.clear();
       m_warnings.clear();
+    }
+
+    void OSServer_Impl::logNetworkReply(const std::string& methodName) const
+    {
+      bool doLog = false;
+
+      if (doLog && m_networkReply){
+        LogLevel level = Warn;
+
+        LOG(level, methodName);
+
+        QNetworkRequest request = m_networkReply->request();
+
+        LOG(level, "Request Url");
+        LOG(level, toString(request.url().toString()));
+
+        LOG(level, "Request Header");
+        for(int i=0; i<request.rawHeaderList().size(); ++i){
+          QString str(request.rawHeaderList()[i].constData());
+          LOG(level, toString(str) << ": " << toString(request.rawHeader(request.rawHeaderList()[i] ).constData()));
+        }
+
+        LOG(level, "Reply Header");
+        for(int i=0; i<m_networkReply->rawHeaderList().size(); ++i){
+          QString str(m_networkReply->rawHeaderList()[i].constData());
+          LOG(level, toString(str) << ": " << toString(m_networkReply->rawHeader(m_networkReply->rawHeaderList()[i] ).constData()));
+        }
+
+        LOG(level, "Reply Body");
+        QString str(m_networkReply->readAll());
+        LOG(level, toString(str));
+      }
     }
 
     void OSServer_Impl::logError(const std::string& error) const
@@ -1679,6 +1741,21 @@ namespace openstudio{
   bool OSServer::startDownloadDataPoint(const UUID& analysisUUID, const UUID& dataPointUUID, const openstudio::path& downloadPath) 
   {
     return getImpl<detail::OSServer_Impl>()->startDownloadDataPoint(analysisUUID, dataPointUUID, downloadPath);
+  }
+
+  bool OSServer::connect(const char* signal,
+                         const QObject* qObject,
+                         const char* slot,
+                         Qt::ConnectionType type) const
+  {
+    return QObject::connect(getImpl<detail::OSServer_Impl>().get(), signal, qObject, slot, type);
+  }
+
+  bool OSServer::disconnect(const char* signal,
+                            const QObject* receiver,
+                            const char* slot) const
+  {
+    return QObject::disconnect(getImpl<detail::OSServer_Impl>().get(), signal, receiver, slot);
   }
 
 } // openstudio

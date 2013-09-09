@@ -20,13 +20,99 @@
 #ifndef UTILITIES_CLOUD_AWSPROVIDER_IMPL_HPP
 #define UTILITIES_CLOUD_AWSPROVIDER_IMPL_HPP
 
-#include <utilities/cloud/CloudProvider.hpp>
 #include <utilities/cloud/CloudProvider_Impl.hpp>
+#include <utilities/cloud/AWSProvider.hpp>
 
 #include <QProcess>
 
 namespace openstudio{
 namespace detail{
+
+  /// AWSSettings_Impl is a CloudSettings_Impl.
+  class UTILITIES_API AWSSettings_Impl : public CloudSettings_Impl {
+   public:
+
+    /** @name Constructor */
+    //@{
+
+    /// default constructor, loads defaults from settings
+    AWSSettings_Impl();
+
+    /** Constructor provided for deserialization; not for general use. */
+    AWSSettings_Impl(const UUID& uuid,
+                     const UUID& versionUUID);
+
+    //@}
+    /** @name Destructors */
+    //@{
+
+    /// virtual destructor
+    virtual ~AWSSettings_Impl();
+
+    //@}
+    /** @name Inherited members */
+    //@{
+
+    virtual std::string cloudProviderType() const;
+
+    virtual std::string userAgreementText() const;
+
+    virtual bool userAgreementSigned() const;
+
+    virtual void signUserAgreement(bool agree);
+
+    virtual bool loadSettings(bool overwriteExisting = false);
+
+    virtual bool saveToSettings(bool overwriteExisting = false) const;
+
+    //@}
+    /** @name Class members */
+    //@{
+    //@}
+   private:
+    // configure logging
+    REGISTER_LOGGER("utilities.cloud.AWSSettings");
+  };
+
+  /// AWSSession_Impl is a CloudSession_Impl.
+  class UTILITIES_API AWSSession_Impl : public CloudSession_Impl {
+  public:
+    /** @name Constructor */
+    //@{
+
+    AWSSession_Impl(const std::string& sessionId,
+                        const boost::optional<Url>& serverUrl,
+                        const std::vector<Url>& workerUrls);
+
+    /** Constructor provided for deserialization; not for general use. */
+    AWSSession_Impl(const UUID& uuid,
+                        const UUID& versionUUID,
+                        const std::string& sessionId,
+                        const boost::optional<Url>& serverUrl,
+                        const std::vector<Url>& workerUrls);
+
+    //@}
+    /** @name Destructors */
+    //@{
+
+    virtual ~AWSSession_Impl();
+
+    //@}
+    /** @name Inherited members */
+    //@{
+
+    virtual std::string cloudProviderType() const;
+
+    //@}
+    /** @name Class members */
+    //@{
+
+    //@}
+
+  private:
+    // configure logging
+    REGISTER_LOGGER("utilities.cloud.AWSSession");
+  };
 
   /// AWSProvider is a CloudProvider that provides access to Amazon EC2 and CloudWatch services.
   class UTILITIES_API AWSProvider_Impl : public CloudProvider_Impl {
@@ -80,6 +166,14 @@ namespace detail{
     /// blocking call, clears errors and warnings
     virtual bool validateCredentials() const;
 
+    /// returns the current settings
+    /// blocking call
+    virtual CloudSettings settings() const;
+
+    /// returns true if can assign settings
+    /// blocking call, clears errors and warnings
+    virtual bool setSettings(const CloudSettings& settings);
+
     /// returns the current session id
     /// blocking call
     virtual CloudSession session() const;
@@ -128,6 +222,9 @@ namespace detail{
     /** @name Class members */
     //@{
 
+    // returns the cloud provider type
+    static std::string cloudProviderType();
+
     // returns the AWS access key
     std::string accessKey() const;
 
@@ -154,7 +251,8 @@ namespace detail{
 
   private:
 
-    CloudSession m_cloudSession;
+    AWSSettings m_awsSettings;
+    AWSSession m_awsSession;
 
     bool loadCredentials() const;
     bool saveCredentials() const;

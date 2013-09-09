@@ -39,14 +39,72 @@
 namespace openstudio{
   namespace detail{
 
+    AWSSettings_Impl::AWSSettings_Impl()
+      : CloudSettings_Impl()
+    {}
+
+    AWSSettings_Impl::AWSSettings_Impl(const UUID& uuid,
+                                       const UUID& versionUUID)
+      : CloudSettings_Impl(uuid,versionUUID)
+    {}
+
+    AWSSettings_Impl::~AWSSettings_Impl()
+    {}
+
+    std::string AWSSettings_Impl::cloudProviderType() const {
+      return AWSProvider_Impl::cloudProviderType();
+    }
+
+    std::string AWSSettings_Impl::userAgreementText() const {
+      return std::string();
+    }
+
+    bool AWSSettings_Impl::userAgreementSigned() const {
+      return false;
+    }
+
+    void AWSSettings_Impl::signUserAgreement(bool agree) {
+
+    }
+
+    bool AWSSettings_Impl::loadSettings(bool overwriteExisting) {
+      return false;
+    }
+
+    bool AWSSettings_Impl::saveToSettings(bool overwriteExisting) const {
+      return false;
+    }
+
+    AWSSession_Impl::AWSSession_Impl(const std::string& sessionId,
+                                     const boost::optional<Url>& serverUrl,
+                                     const std::vector<Url>& workerUrls)
+      : CloudSession_Impl(sessionId,serverUrl,workerUrls)
+    {}
+
+    AWSSession_Impl::AWSSession_Impl(const UUID& uuid,
+                                     const UUID& versionUUID,
+                                     const std::string& sessionId,
+                                     const boost::optional<Url>& serverUrl,
+                                     const std::vector<Url>& workerUrls)
+      : CloudSession_Impl(uuid,versionUUID,sessionId,serverUrl,workerUrls)
+    {}
+
+    AWSSession_Impl::~AWSSession_Impl()
+    {}
+
+    std::string AWSSession_Impl::cloudProviderType() const {
+      return AWSProvider_Impl::cloudProviderType();
+    }
+
     AWSProvider_Impl::AWSProvider_Impl()
       : CloudProvider_Impl(),
-        m_cloudSession(this->type(), toString(createUUID()), OptionalUrl(), UrlVector()),
+        m_awsSettings(),
+        m_awsSession(toString(createUUID()),boost::none,std::vector<Url>()),
         m_validAccessKey(false),
         m_validSecretKey(false),
         m_numWorkers(0),
         m_startServerProcess(NULL), m_startWorkerProcess(NULL),
-        m_serverStarted(false), m_workerStarted(false), m_terminated(false), m_serverStopped(false), m_workerStopped(false)
+        m_serverStarted(false), m_workerStarted(false), m_serverStopped(false), m_workerStopped(false), m_terminated(false)
     {
       //Make sure a QApplication exists
       openstudio::Application::instance().application();
@@ -124,9 +182,21 @@ namespace openstudio{
       return false;
     }
 
+    CloudSettings AWSProvider_Impl::settings() const {
+      return m_awsSettings;
+    }
+
+    bool AWSProvider_Impl::setSettings(const CloudSettings& settings) {
+      if (OptionalAWSSettings candidate = settings.optionalCast<AWSSettings>()) {
+        m_awsSettings = *candidate;
+        return true;
+      }
+      return false;
+    }
+
     CloudSession AWSProvider_Impl::session() const
     {
-      return m_cloudSession;
+      return m_awsSession;
     }
 
     bool AWSProvider_Impl::reconnect(const CloudSession& session)
@@ -184,6 +254,10 @@ namespace openstudio{
     std::vector<std::string> AWSProvider_Impl::warnings() const
     {
       return std::vector<std::string>();
+    }
+
+    std::string AWSProvider_Impl::cloudProviderType() {
+      return "AWSProvider";
     }
      
     void AWSProvider_Impl::clearErrorsAndWarnings() const
@@ -317,6 +391,65 @@ namespace openstudio{
 
   } // detail
 
+  AWSSettings::AWSSettings()
+    : CloudSettings(boost::shared_ptr<detail::AWSSettings_Impl>(
+                      new detail::AWSSettings_Impl()))
+  {
+    OS_ASSERT(getImpl<detail::AWSSettings_Impl>());
+  }
+
+  AWSSettings::AWSSettings(const UUID& uuid,
+                           const UUID& versionUUID)
+    : CloudSettings(boost::shared_ptr<detail::AWSSettings_Impl>(
+                      new detail::AWSSettings_Impl(uuid,versionUUID)))
+  {
+    OS_ASSERT(getImpl<detail::AWSSettings_Impl>());
+  }
+
+  AWSSettings::~AWSSettings()
+  {}
+
+  AWSSettings::AWSSettings(const boost::shared_ptr<detail::AWSSettings_Impl>& impl)
+    : CloudSettings(impl)
+  {
+    OS_ASSERT(getImpl<detail::AWSSettings_Impl>());
+  }
+
+  AWSSession::AWSSession(const std::string& sessionId,
+                         const boost::optional<Url>& serverUrl,
+                         const std::vector<Url>& workerUrls)
+    : CloudSession(boost::shared_ptr<detail::AWSSession_Impl>(
+                     new detail::AWSSession_Impl(sessionId,
+                                                 serverUrl,
+                                                 workerUrls)))
+  {
+    OS_ASSERT(getImpl<detail::AWSSession_Impl>());
+  }
+
+  AWSSession::AWSSession(const UUID& uuid,
+                         const UUID& versionUUID,
+                         const std::string& sessionId,
+                         const boost::optional<Url>& serverUrl,
+                         const std::vector<Url>& workerUrls)
+    : CloudSession(boost::shared_ptr<detail::AWSSession_Impl>(
+                     new detail::AWSSession_Impl(uuid,
+                                                 versionUUID,
+                                                 sessionId,
+                                                 serverUrl,
+                                                 workerUrls)))
+  {
+    OS_ASSERT(getImpl<detail::AWSSession_Impl>());
+  }
+
+  AWSSession::~AWSSession()
+  {}
+
+  AWSSession::AWSSession(const boost::shared_ptr<detail::AWSSession_Impl>& impl)
+    : CloudSession(impl)
+  {
+    OS_ASSERT(getImpl<detail::AWSSession_Impl>());
+  }
+
   AWSProvider::AWSProvider()
     : CloudProvider(boost::shared_ptr<detail::AWSProvider_Impl>(new detail::AWSProvider_Impl()))
   {
@@ -324,6 +457,12 @@ namespace openstudio{
 
   unsigned AWSProvider::numWorkers() {
     return getImpl<detail::AWSProvider_Impl>()->numWorkers();
+  }
+
+  AWSProvider::AWSProvider(const boost::shared_ptr<detail::AWSProvider_Impl>& impl)
+    : CloudProvider(impl)
+  {
+    OS_ASSERT(getImpl<detail::AWSProvider_Impl>());
   }
 
 } // openstudio
